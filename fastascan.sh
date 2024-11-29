@@ -11,25 +11,32 @@ FA_N=$(find $1 -name "*.fasta" -or -name "*.fa" | wc -l)
 echo There are $FA_N fasta files in folder $1 
 
 # Number of unique fasta ID in total 
-FA=$(find $1 -name "*.fasta" -or -name "*.fa")
+FA=$(find $1 -type f -name "*.fasta" -or -name "*.fa")
 ID_uniq=$(awk '/>/{print $1}' $FA | sort | uniq | wc -l)
 echo There are $ID_uniq uniq ID in folder $1
 
 # Report of fasta/fa files 
 for i in $FA
-	do echo ==== Report of file $i: ====
+	do echo ==== Report of file: $i ====
 		# Check if the file is a symbolic link 
-		if [[ -h $i ]]; then echo The file $i is a symbolic link
-		else echo The file $i is NOT a symbolic link
-		fi 	
-	# Number of sequences inside each file
-	SEQ=$(grep -c ">" $i)
-		if [[ $SEQ -eq 0 ]]
-		then echo There are NOT sequences inside
-		elif [[ $SEQ -eq 1 ]]
-		then echo There is 1 sequence inside
-		else echo There are $SEQ sequences inside 
+		if [[ -h $i ]]; then echo The file is a symbolic link
+		else echo The file is NOT a symbolic link
+		fi 
+	# Check if the files are not empty 
+	if [[ -s $i ]]  
+		# Number of sequences inside each file
+		then SEQ=$(grep -c ">" $i)
+		if [[ $SEQ -eq 1 ]]
+			then echo There is 1 sequence inside
+			else echo There are $SEQ sequences inside 
 		fi
-	done
+		# Total sequence length 
+		awk '!/>/{gsub(/[^A-Za-z]/, "") ##only counts for the sequence itself
+		total_length += length($0)}
+		END{print "Total sequence length: " total_length}' $i
+	else echo File is empty: NO sequences inside
+	fi
+
+done
 
 
