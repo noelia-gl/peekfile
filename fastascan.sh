@@ -19,7 +19,8 @@ echo There are $ID_uniq uniq ID in folder $1
 for i in $FA
 	do echo ==== Report of file: $i ====
 		# Check if the file is a symbolic link 
-		if [[ -h $i ]]; then echo The file is a symbolic link
+		if [[ -h $i ]]
+			then echo The file is a symbolic link
 		else echo The file is NOT a symbolic link
 		fi 
 	# Check if the files are not empty 
@@ -36,7 +37,21 @@ for i in $FA
 		END{print "Total sequence length: " total_length}' $i
 	else echo File is empty: NO sequences inside
 	fi
-
+	# Display full content 
+	if [[ $N -eq 0 ]]; 
+		# If $N is 0, skip this part
+		then echo Skip display content because number of lines is 0	
+	elif [[ $(wc -l < $i) -le $((2 * $N)) ]]
+		# If file has 2*$N lines or less, display full content
+		then echo Full file content: 
+		cat $i
+	else 
+		# If file has more than 2*$N lines, only display first and last $N lines
+		echo "File content (first $N and last $N lines)"
+		head -n $N $i 
+		echo "..."
+		tail -n $N $i 
+	fi
 done
 
 
